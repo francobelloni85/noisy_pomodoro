@@ -1,0 +1,177 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pomodoro with noise detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+
+    <style>
+
+        #volume-visualizer {
+            --volume: 0%;
+            position: relative;
+            width: 200px;
+            height: 20px;
+            margin: 50px;
+            background-color: #DDD;
+        }
+
+            #volume-visualizer::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: var(--volume);
+                background-color: green;
+                transition: width 100ms linear;
+            }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+
+        <div class="row mt-2">
+            <div class="col-12">
+
+                <div class="accordion" id="accordionPanelsStayOpenExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                                Pomodoro with noise detector
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                            <div class="accordion-body">
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <h3>Noise</h3>
+                                        <div id="volume-visualizer"></div>
+                                    </div>
+                                    <div class="col-2">
+                                        <h3>Value</h3>
+                                        76
+                                    </div>
+                                    <div class="col-4">
+                                        <h3>Timer</h3>
+                                    </div>
+                                </div>                                
+                                <button id="start">Start</button>
+                                <button id="stop">Stop</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                                Settings
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
+                            <div class="accordion-body">
+                                <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                                Statistics
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingThree">
+                            <div class="accordion-body">
+                                <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+
+
+    <script>
+
+        (async () => {
+            let volumeCallback = null;
+            let volumeInterval = null;
+            const volumeVisualizer = document.getElementById('volume-visualizer');
+            const startButton = document.getElementById('start');
+            const stopButton = document.getElementById('stop');
+
+            // Initialize
+            try {
+
+                const audioStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true
+                    }
+                });
+
+                const audioContext = new AudioContext();
+                const audioSource = audioContext.createMediaStreamSource(audioStream);
+                const analyser = audioContext.createAnalyser();
+                analyser.fftSize = 512;
+                analyser.minDecibels = -127;
+                analyser.maxDecibels = 0;
+                analyser.smoothingTimeConstant = 0.4;
+                audioSource.connect(analyser);
+                const volumes = new Uint8Array(analyser.frequencyBinCount);
+                volumeCallback = () => {
+                    analyser.getByteFrequencyData(volumes);
+                    let volumeSum = 0;
+                    for (const volume of volumes)
+                        volumeSum += volume;
+                    const averageVolume = volumeSum / volumes.length;
+                    // Value range: 127 = analyser.maxDecibels - analyser.minDecibels;
+                    volumeVisualizer.style.setProperty('--volume', (averageVolume * 100 / 127) + '%');
+                };
+
+            } catch (e) {
+                console.error('Failed to initialize volume visualizer, simulating instead...', e);
+                // Simulation
+                //TODO remove in production!
+                let lastVolume = 50;
+                volumeCallback = () => {
+                    const volume = Math.min(Math.max(Math.random() * 100, 0.8 * lastVolume), 1.2 * lastVolume);
+                    lastVolume = volume;
+                    volumeVisualizer.style.setProperty('--volume', volume + '%');
+                };
+            }
+
+            // Use
+            startButton.addEventListener('click', () => {
+                // Updating every 100ms (should be same as CSS transition speed)
+                if (volumeCallback !== null && volumeInterval === null)
+                    volumeInterval = setInterval(volumeCallback, 100);
+            });
+
+            stopButton.addEventListener('click', () => {
+                if (volumeInterval !== null) {
+                    clearInterval(volumeInterval);
+                    volumeInterval = null;
+                }
+            });
+
+        })();
+
+
+    </script>
+
+</body>
+</html>
+
