@@ -11,9 +11,9 @@
         #volume-visualizer {
             --volume: 0%;
             position: relative;
-            width: 200px;
+            /*width: 200px;*/
             height: 20px;
-            margin: 50px;
+            margin: 30px;
             background-color: #DDD;
         }
 
@@ -28,12 +28,9 @@
                 transition: width 100ms linear;
             }
 
-
-        #display_timer {
+        .main_label {
             font-family: 'Courier New';
             font-size: 36px;
-            color: green;
-            border: 1px solid green;
         }
 
         td {
@@ -62,7 +59,7 @@
                         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
                             <div class="accordion-body">
                                 <div class="row mt-2">
-                                    <div class="col-4">
+                                    <div class="col-4 text-center">
                                         <h3>Noise</h3>
                                         <div id="volume-visualizer"></div>
                                     </div>
@@ -70,21 +67,21 @@
                                         <h3>Value</h3>
                                         <p id="noise_value">76</p>
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-2 text-center">
                                         <h3>Strike</h3>
-                                        <p>0</p>
+                                        <p id="display_strike" class="badge text-bg-primary main_label">0</p>
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-2 text-center">
                                         <h3>Mode</h3>
-                                        <p>Lesson time</p>
+                                        <p class="badge text-bg-success main_label">Lesson time</p>
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-2 text-center">
                                         <h3>Timer</h3>
-                                        <p id="display_timer">0m 0s</p>
+                                        <p id="display_timer" class="badge text-bg-light main_label">00:00</p>
                                     </div>
                                 </div>
-                                <button id="start">Start</button>
-                                <button id="stop">Stop</button>
+                                <button id="start" class="btn btn-success">Start</button>
+                                <button id="stop" class="btn btn-danger">Stop</button>
                             </div>
                         </div>
                     </div>
@@ -177,7 +174,11 @@
                         </h2>
                         <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingThree">
                             <div class="accordion-body">
-                                <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+
+                                <div>
+                                    <canvas id="myChart"></canvas>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -200,6 +201,7 @@
             noise_threshold_decibel_break: 70,
             noise_threshold_seconds_break: 3,
             enable_audio: 1,
+            strike: 0,
         };
 
         /* event listener */
@@ -266,8 +268,24 @@
     <!--VOLUME DETECTOR-->
     <script>
 
+        // Next CountDown
         let countDownDate = new Date("Jan 5, 2024 15:37:25").getTime();
+
+        var audio_shh = new Audio('https://www.baobab.school/public/audio/ShushSoundEffect.mp3');
+
+        // Timer
         let countdownTimer = null;
+
+        let timeElapseMs = 0;
+        let timeElapseSecond = 0;
+        let timeElapseMinutes = 0;
+
+        const graph_data = [];
+        const graph_label = [];
+
+        let countVolumeAboveThreshold = 0;
+        let countGraphData = 0;
+
 
         (async () => {
             let volumeCallback = null;
@@ -276,6 +294,11 @@
             const startButton = document.getElementById('start');
             const stopButton = document.getElementById('stop');
             const noiseValue = document.getElementById('noise_value');
+            const displayStrike = document.getElementById('display_strike');
+
+
+            startButton.disabled = false;
+            stopButton.disabled = true;
 
             // Initialize
             try {
@@ -306,22 +329,49 @@
                     noiseValue.innerText = parseInt(averageVolume);
                     // Value range: 127 = analyser.maxDecibels - analyser.minDecibels;
                     volumeVisualizer.style.setProperty('--volume', (averageVolume * 100 / 127) + '%');
+
+
+                    if (averageVolume > settings.noise_threshold_decibel_lesson) {
+                        countVolumeAboveThreshold = countVolumeAboveThreshold + 1;
+                    }
+
+                    if (countVolumeAboveThreshold > (settings.noise_threshold_seconds_lesson * 10)) {
+                        countVolumeAboveThreshold = 0;
+                        settings.strike = settings.strike + 1;
+                        displayStrike.innerHTML = settings.strike;                        
+                        audio_shh.play();
+                    }
+
+                    // TODO -> REFACTORY CON IL TIMER ... 
+                    if (timeElapseMs > 9) {
+                        timeElapseMs = timeElapseMs = 0;
+                        timeElapseSecond = timeElapseSecond + 1;
+                        if (timeElapseSecond > 59) {
+                            timeElapseSecond = 0;
+                            timeElapseMinutes = timeElapseMinutes + 1;
+                        }
+                        let newLabel = timeElapseMinutes + ":" + timeElapseSecond;
+                        addData(newLabel, averageVolume);
+                        countGraphData = countGraphData + 1;                        
+                    }
+                    timeElapseMs = timeElapseMs + 1;
                 };
 
             } catch (e) {
-                console.error('Failed to initialize volume visualizer, simulating instead...', e);
-                // Simulation
-                //TODO remove in production!
-                let lastVolume = 50;
-                volumeCallback = () => {
-                    const volume = Math.min(Math.max(Math.random() * 100, 0.8 * lastVolume), 1.2 * lastVolume);
-                    lastVolume = volume;
-                    volumeVisualizer.style.setProperty('--volume', volume + '%');
-                };
+                alert('Failed to initialize volume visualizer ', e);
             }
 
             // Use
+
             startButton.addEventListener('click', () => {
+
+                // Add the minutes for the timer
+                var currentDateObj = new Date();
+                var numberOfMlSeconds = currentDateObj.getTime();
+                var addMlSeconds = settings.lesson_time * 60 * 1000;
+                countDownDate = new Date(numberOfMlSeconds + addMlSeconds);
+
+
                 // Updating every 100ms (should be same as CSS transition speed)
                 if (volumeCallback !== null && volumeInterval === null)
                     volumeInterval = setInterval(volumeCallback, 100);
@@ -332,6 +382,10 @@
                 } else {
                     alert("Timer already set");
                 }
+
+                startButton.disabled = true;
+                stopButton.disabled = false;
+
             });
 
             stopButton.addEventListener('click', () => {
@@ -346,6 +400,9 @@
                     countdownTimer = null;
                 }
 
+                startButton.disabled = false;
+                stopButton.disabled = true;
+
             });
 
         })();
@@ -356,9 +413,8 @@
 
     <!--TIMER-->
     <script>
+
         // Set the date we're counting down to
-
-
         function UpdateClockCallBack() {
 
             // Get today's date and time
@@ -372,27 +428,78 @@
             //var days = Math.floor(distance / (1000 * 60 * 60 * 24));
             //var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            // Display the result in the element with id="demo"
-            document.getElementById("display_timer").innerHTML = minutes + "m " + seconds + "s ";
-
+            var el = document.getElementById("display_timer");
 
             // If the count down is finished, write some text
             if (distance < 0) {
-                clearInterval(countdownTimer);
-                document.getElementById("display_timer").innerHTML = "EXPIRED";
-                countdownTimer = null;
+                if (el.classList.contains("text-danger") === false) {
+                    el.classList.add("text-danger");
+                    el.classList.remove("text-danger");
+                }
+                distance = now - countDownDate;
+            }
+            else {
+
+                if (el.classList.contains("text-success") === false) {
+                    el.classList.add("text-success");
+                    el.classList.remove("text-danger");
+                }
             }
 
+            SetDisplayTimer(distance);
 
+        }
+
+        function SetDisplayTimer(distance) {
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (seconds < 10) { seconds = "0" + seconds }
+            // Display the result in the element with id="display_timer"
+            document.getElementById("display_timer").innerHTML = minutes + ":" + seconds;
         }
 
 
 
     </script>
 
+
+    <!--CHART-->
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+        const ctx = document.getElementById('myChart');
+
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Noise db',
+                    borderWidth: 2,
+                    fill: false,
+                    data: []
+                }]
+            },
+        });
+
+        function addData(label, data) {
+            myChart.data.labels.push(label);
+            myChart.data.datasets[0].data.push(data);
+            myChart.update();
+        }
+        
+        function removeData() {
+            myChart.data.labels.shift();
+            myChart.data.datasets[0].data.shift();
+            myChart.update();
+        }
+
+
+    </script>
 
 
 
