@@ -29,11 +29,20 @@
             }
 
 
-        #display_timer {        
-            font-family:'Courier New';
-            font-size:larger;
+        #display_timer {
+            font-family: 'Courier New';
+            font-size: 36px;
+            color: green;
+            border: 1px solid green;
         }
 
+        td {
+            padding: 5px;
+        }
+
+        .invalid {
+            border: 1px solid red;
+        }
     </style>
 </head>
 
@@ -59,7 +68,7 @@
                                     </div>
                                     <div class="col-2">
                                         <h3>Value</h3>
-                                        <p>76</p>
+                                        <p id="noise_value">76</p>
                                     </div>
                                     <div class="col-2">
                                         <h3>Strike</h3>
@@ -71,7 +80,7 @@
                                     </div>
                                     <div class="col-2">
                                         <h3>Timer</h3>
-                                        <p id="display_timer"></p>
+                                        <p id="display_timer">0m 0s</p>
                                     </div>
                                 </div>
                                 <button id="start">Start</button>
@@ -87,7 +96,76 @@
                         </h2>
                         <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
                             <div class="accordion-body">
-                                <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+
+
+                                <table width="100%">
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtLessonTime" class="form-label">Lesson time (minutes)</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtLessonTime" name="txtLessonTime" placeholder="25">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtBreakTime" class="form-label">Break time (minutes)</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtBreakTime" name="txtBreakTime" placeholder="5">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtNoiseThresholdDecibelLesson" class="form-label">Noise threshold (decibel) for lesson</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtNoiseThresholdDecibelLesson" name="txtNoiseThresholdDecibelLesson" placeholder="50">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtNoiseThresholdTimeLesson" class="form-label">Noise threshold (seconds) for lesson</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtNoiseThresholdTimeLesson" name="txtNoiseThresholdTimeLesson" placeholder="2">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtNoiseThresholdDecibelBreak" class="form-label">Noise threshold (decibel) for break</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtNoiseThresholdDecibelBreak" name="txtNoiseThresholdDecibelBreak" placeholder="70">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtNoiseThresholdTimeBreck" class="form-label">Noise threshold (seconds) for break</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtNoiseThresholdTimeBreck" name="txtNoiseThresholdTimeBreck" placeholder="3">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtEnableAudio" class="form-label">Enable audio "Shhh" (ON = 1, OFF = 0)</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtEnableAudio" name="txtEnableAudio" placeholder="1">
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+
+
                             </div>
                         </div>
                     </div>
@@ -108,12 +186,88 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
 
+    <!--SETTINGS-->
+    <script>
+
+        const settings = {
+            lesson_time: 25,
+            break_time: 5,
+            noise_threshold_decibel_lesson: 50,
+            noise_threshold_seconds_lesson: 2,
+            noise_threshold_decibel_break: 70,
+            noise_threshold_seconds_break: 3,
+            enable_audio: 1,
+        };
+
+        /* event listener */
+        document.getElementsByName("txtLessonTime")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtBreakTime")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtNoiseThresholdDecibelLesson")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtNoiseThresholdTimeLesson")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtNoiseThresholdDecibelBreak")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtNoiseThresholdTimeBreck")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtEnableAudio")[0].addEventListener('change', ChangeSettings);
+
+        /* function */
+
+        function ChangeSettings() {
+            console.log('Horray! Someone wrote "' + this.value + " " + this.id + '"!');
+            const newValue = parseInt(this.value);
+
+            if (isNaN(newValue)) {
+                //alert("Input is not a number!");
+                document.getElementById(this.id).classList.add("invalid");
+                return;
+            }
+
+            switch (this.id) {
+                case "txtLessonTime":
+                    settings.lesson_time = newValue;
+                    document.getElementById("display_timer").innerHTML = settings.lesson_time + "m " + "0s ";
+                    break;
+
+                case "txtBreakTime":
+                    settings.break_time = newValue;
+                    break;
+
+                case "txtNoiseThresholdDecibelLesson":
+                    settings.noise_threshold_decibel_lesson = newValue;
+                    break;
+
+                case "txtNoiseThresholdTimeLesson":
+                    settings.noise_threshold_seconds_lesson = newValue;
+                    break;
+
+                case "txtNoiseThresholdDecibelBreak":
+                    settings.noise_threshold_decibel_break = newValue;
+                    break;
+
+                case "txtNoiseThresholdTimeBreck":
+                    settings.noise_threshold_seconds_break = newValue;
+                    break;
+
+                case "txtEnableAudio":
+                    settings.enable_audio = newValue;
+                    break;
+
+            }
+
+            console.log("Setting have been changed");
+            console.log(settings);
+
+        }
+
+
+    </script>
 
     <!--VOLUME DETECTOR-->
     <script>
+
+        let countDownDate = new Date("Jan 5, 2024 15:37:25").getTime();
+        let countdownTimer = null;
 
         (async () => {
             let volumeCallback = null;
@@ -121,6 +275,7 @@
             const volumeVisualizer = document.getElementById('volume-visualizer');
             const startButton = document.getElementById('start');
             const stopButton = document.getElementById('stop');
+            const noiseValue = document.getElementById('noise_value');
 
             // Initialize
             try {
@@ -139,13 +294,16 @@
                 analyser.maxDecibels = 0;
                 analyser.smoothingTimeConstant = 0.4;
                 audioSource.connect(analyser);
+
                 const volumes = new Uint8Array(analyser.frequencyBinCount);
+
                 volumeCallback = () => {
                     analyser.getByteFrequencyData(volumes);
                     let volumeSum = 0;
                     for (const volume of volumes)
                         volumeSum += volume;
                     const averageVolume = volumeSum / volumes.length;
+                    noiseValue.innerText = parseInt(averageVolume);
                     // Value range: 127 = analyser.maxDecibels - analyser.minDecibels;
                     volumeVisualizer.style.setProperty('--volume', (averageVolume * 100 / 127) + '%');
                 };
@@ -167,13 +325,27 @@
                 // Updating every 100ms (should be same as CSS transition speed)
                 if (volumeCallback !== null && volumeInterval === null)
                     volumeInterval = setInterval(volumeCallback, 100);
+
+                if (countdownTimer === null) {
+                    // Update the count down every 1 second
+                    countdownTimer = setInterval(UpdateClockCallBack, 1000);
+                } else {
+                    alert("Timer already set");
+                }
             });
 
             stopButton.addEventListener('click', () => {
+
                 if (volumeInterval !== null) {
                     clearInterval(volumeInterval);
                     volumeInterval = null;
                 }
+
+                if (countdownTimer !== null) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+
             });
 
         })();
@@ -185,10 +357,9 @@
     <!--TIMER-->
     <script>
         // Set the date we're counting down to
-        var countDownDate = new Date("Jan 5, 2024 15:37:25").getTime();
 
-        // Update the count down every 1 second
-        var x = setInterval(function () {
+
+        function UpdateClockCallBack() {
 
             // Get today's date and time
             var now = new Date().getTime();
@@ -197,21 +368,34 @@
             var distance = countDownDate - now;
 
             // Time calculations for days, hours, minutes and seconds
-            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+            //var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            //var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             // Display the result in the element with id="demo"
-            document.getElementById("display_timer").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+            document.getElementById("display_timer").innerHTML = minutes + "m " + seconds + "s ";
+
 
             // If the count down is finished, write some text
             if (distance < 0) {
-                clearInterval(x);
-                document.getElementById("demo").innerHTML = "EXPIRED";
+                clearInterval(countdownTimer);
+                document.getElementById("display_timer").innerHTML = "EXPIRED";
+                countdownTimer = null;
             }
-        }, 1000);
+
+
+        }
+
+
+
     </script>
+
+
+
+
 
 </body>
 </html>
