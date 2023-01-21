@@ -63,9 +63,9 @@
                                         <h3>Noise</h3>
                                         <div id="volume-visualizer"></div>
                                     </div>
-                                    <div class="col-1">
-                                        <h3>Value</h3>
-                                        <p id="noise_value">76</p>
+                                    <div class="col-1 text-center">
+                                        <h3>Threshold</h3>
+                                        <p id="noise_threshold" class="badge text-bg-primary main_label">-</p>
                                     </div>
                                     <div class="col-2 text-center">
                                         <h3>Strike</h3>
@@ -180,6 +180,21 @@
                                     <canvas id="myChart"></canvas>
                                 </div>
 
+                                <br /><br />
+
+                                <table width="100%">
+                                    <tr>
+                                        <td style="width:50%">
+                                            <input type="text" class="form-control" id="txtClassName" name="txtClassName" placeholder="25">
+                                        </td>
+                                        <td>
+                                            
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <button id="btnExport" class="btn btn-success">Export</button>
+
                             </div>
                         </div>
                     </div>
@@ -235,7 +250,7 @@
         const startButton = document.getElementById('btnStart');
         const stopButton = document.getElementById('btnStop');
         const changeModeButton = document.getElementById('btnChangeMode');
-        const noiseValue = document.getElementById('noise_value');
+        const noiseThreshold = document.getElementById('noise_threshold');
         const displayStrike = document.getElementById('display_strike');
         const displayMode = document.getElementById('display_mode');
 
@@ -243,6 +258,8 @@
         startButton.disabled = false;
         stopButton.disabled = true;
         changeModeButton.disabled = true;
+
+        noiseThreshold.innerHTML = settings.noise_threshold_decibel_lesson;
 
     </script>
 
@@ -309,6 +326,16 @@
         }
 
 
+        function SetNewCountDownDate(minutesToAdd) {
+
+            // Add the minutes for the timer
+            var currentDateObj = new Date();
+            var numberOfMlSeconds = currentDateObj.getTime();
+            var addMlSeconds = minutesToAdd * 60 * 1000;
+            countDownDate = new Date(numberOfMlSeconds + addMlSeconds);
+
+        }
+
     </script>
 
     <!--BUTTONS-->
@@ -317,12 +344,8 @@
         (async () => {
             startButton.addEventListener('click', () => {
 
-                // Add the minutes for the timer
-                var currentDateObj = new Date();
-                var numberOfMlSeconds = currentDateObj.getTime();
-                var addMlSeconds = settings.lesson_time * 60 * 1000;
-                countDownDate = new Date(numberOfMlSeconds + addMlSeconds);
 
+                SetNewCountDownDate(settings.lesson_time);
 
                 // Updating every 100ms (should be same as CSS transition speed)
                 if (volumeCallback !== null && volumeInterval === null)
@@ -361,8 +384,17 @@
 
             changeModeButton.addEventListener('click', () => {
                 changeModeButton.innerText = currentMode;
+
                 ChangeMode();
                 displayMode.innerHTML = currentMode;
+
+                if (currentMode === modeLession) {
+                    SetNewCountDownDate(settings.lesson_time);
+                }
+                else {
+                    SetNewCountDownDate(settings.break_time);
+                }
+
             });
 
         })();
@@ -376,6 +408,17 @@
                 currentMode = modeLession;
             }
         }
+
+        function SetNoiseNoiseThreshold(currentValue) {
+            if (currentMode === modeLession) {                
+                noise_threshold.innerHTML = currentValue + "/" + settings.noise_threshold_decibel_lesson;
+            }
+            else {
+                noise_threshold.innerHTML = currentValue + "/" + settings.noise_threshold_decibel_break;
+            }
+
+        }
+
 
     </script>
 
@@ -412,7 +455,9 @@
                     for (const volume of volumes)
                         volumeSum += volume;
                     const averageVolume = volumeSum / volumes.length;
-                    noiseValue.innerText = parseInt(averageVolume);
+
+                    SetNoiseNoiseThreshold(parseInt(averageVolume));
+
                     // Value range: 127 = analyser.maxDecibels - analyser.minDecibels;
                     volumeVisualizer.style.setProperty('--volume', (averageVolume * 100 / 127) + '%');
 
@@ -435,7 +480,10 @@
                         countVolumeAboveThreshold = 0;
                         settings.strike = settings.strike + 1;
                         displayStrike.innerHTML = settings.strike;
-                        //audio_shh.play();
+
+                        if (settings.enable_audio === 1) {
+                            audio_shh.play();
+                        }
                     }
 
                     // TODO -> REFACTORY CON IL TIMER ...
