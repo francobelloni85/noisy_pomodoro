@@ -63,7 +63,7 @@
                                         <h3>Noise</h3>
                                         <div id="volume-visualizer"></div>
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-1">
                                         <h3>Value</h3>
                                         <p id="noise_value">76</p>
                                     </div>
@@ -71,17 +71,18 @@
                                         <h3>Strike</h3>
                                         <p id="display_strike" class="badge text-bg-primary main_label">0</p>
                                     </div>
-                                    <div class="col-2 text-center">
+                                    <div class="col-3 text-center">
                                         <h3>Mode</h3>
-                                        <p class="badge text-bg-success main_label">Lesson time</p>
+                                        <p id="display_mode" class="badge text-bg-success main_label">Lesson time</p>
                                     </div>
                                     <div class="col-2 text-center">
                                         <h3>Timer</h3>
                                         <p id="display_timer" class="badge text-bg-light main_label">00:00</p>
                                     </div>
                                 </div>
-                                <button id="start" class="btn btn-success">Start</button>
-                                <button id="stop" class="btn btn-danger">Stop</button>
+                                <button id="btnStart" class="btn btn-success">Start</button>
+                                <button id="btnChangeMode" class="btn btn-warning">Break mode</button>
+                                <button id="btnStop" class="btn btn-danger">Stop</button>
                             </div>
                         </div>
                     </div>
@@ -190,8 +191,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
 
-    <!--SETTINGS-->
+    <!-- VARIABLES -->
     <script>
+
+        const modeLession = "Lesson time";
+        const modeBreak = "Break time";
+
+        let currentMode = modeLession;
 
         const settings = {
             lesson_time: 25,
@@ -203,6 +209,46 @@
             enable_audio: 1,
             strike: 0,
         };
+
+        // Next CountDown
+        let countDownDate = new Date("Jan 5, 2024 15:37:25").getTime();
+
+        var audio_shh = new Audio('https://www.baobab.school/public/audio/ShushSoundEffect.mp3');
+
+        // Timer
+        let countdownTimer = null;
+
+        let timeElapseMs = 0;
+        let timeElapseSecond = 0;
+        let timeElapseMinutes = 0;
+
+        const graph_data = [];
+        const graph_label = [];
+
+        let countVolumeAboveThreshold = 0;
+        let countGraphData = 0;
+
+        let volumeCallback = null;
+        let volumeInterval = null;
+
+        const volumeVisualizer = document.getElementById('volume-visualizer');
+        const startButton = document.getElementById('btnStart');
+        const stopButton = document.getElementById('btnStop');
+        const changeModeButton = document.getElementById('btnChangeMode');
+        const noiseValue = document.getElementById('noise_value');
+        const displayStrike = document.getElementById('display_strike');
+        const displayMode = document.getElementById('display_mode');
+
+
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        changeModeButton.disabled = true;
+
+    </script>
+
+
+    <!--SETTINGS-->
+    <script>
 
         /* event listener */
         document.getElementsByName("txtLessonTime")[0].addEventListener('change', ChangeSettings);
@@ -265,40 +311,80 @@
 
     </script>
 
+    <!--BUTTONS-->
+    <script>
+
+        (async () => {
+            startButton.addEventListener('click', () => {
+
+                // Add the minutes for the timer
+                var currentDateObj = new Date();
+                var numberOfMlSeconds = currentDateObj.getTime();
+                var addMlSeconds = settings.lesson_time * 60 * 1000;
+                countDownDate = new Date(numberOfMlSeconds + addMlSeconds);
+
+
+                // Updating every 100ms (should be same as CSS transition speed)
+                if (volumeCallback !== null && volumeInterval === null)
+                    volumeInterval = setInterval(volumeCallback, 100);
+
+                if (countdownTimer === null) {
+                    // Update the count down every 1 second
+                    countdownTimer = setInterval(UpdateClockCallBack, 1000);
+                } else {
+                    alert("Timer already set");
+                }
+
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                changeModeButton.disabled = false;
+
+            });
+
+            stopButton.addEventListener('click', () => {
+
+                if (volumeInterval !== null) {
+                    clearInterval(volumeInterval);
+                    volumeInterval = null;
+                }
+
+                if (countdownTimer !== null) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                changeModeButton.disabled = true;
+
+            });
+
+            changeModeButton.addEventListener('click', () => {
+                changeModeButton.innerText = currentMode;
+                ChangeMode();
+                displayMode.innerHTML = currentMode;
+            });
+
+        })();
+
+
+        function ChangeMode() {
+            if (currentMode === modeLession) {
+                currentMode = modeBreak;
+            }
+            else {
+                currentMode = modeLession;
+            }
+        }
+
+    </script>
+
     <!--VOLUME DETECTOR-->
     <script>
 
-        // Next CountDown
-        let countDownDate = new Date("Jan 5, 2024 15:37:25").getTime();
-
-        var audio_shh = new Audio('https://www.baobab.school/public/audio/ShushSoundEffect.mp3');
-
-        // Timer
-        let countdownTimer = null;
-
-        let timeElapseMs = 0;
-        let timeElapseSecond = 0;
-        let timeElapseMinutes = 0;
-
-        const graph_data = [];
-        const graph_label = [];
-
-        let countVolumeAboveThreshold = 0;
-        let countGraphData = 0;
-
 
         (async () => {
-            let volumeCallback = null;
-            let volumeInterval = null;
-            const volumeVisualizer = document.getElementById('volume-visualizer');
-            const startButton = document.getElementById('start');
-            const stopButton = document.getElementById('stop');
-            const noiseValue = document.getElementById('noise_value');
-            const displayStrike = document.getElementById('display_strike');
 
-
-            startButton.disabled = false;
-            stopButton.disabled = true;
 
             // Initialize
             try {
@@ -331,18 +417,28 @@
                     volumeVisualizer.style.setProperty('--volume', (averageVolume * 100 / 127) + '%');
 
 
-                    if (averageVolume > settings.noise_threshold_decibel_lesson) {
-                        countVolumeAboveThreshold = countVolumeAboveThreshold + 1;
+                    let noise_threshold = settings.noise_threshold_decibel_lesson;
+                    let noise_threshold_seconds = settings.noise_threshold_seconds_lesson;
+
+                    if (currentMode === modeBreak) {
+                        noise_threshold = settings.noise_threshold_decibel_break;
+                        noise_threshold_seconds = settings.noise_threshold_decibel_break;
                     }
 
-                    if (countVolumeAboveThreshold > (settings.noise_threshold_seconds_lesson * 10)) {
+                    if (averageVolume > noise_threshold) {
+                        countVolumeAboveThreshold = countVolumeAboveThreshold + 1;
+                    } else {
+                        countVolumeAboveThreshold = 0;
+                    }
+
+                    if (countVolumeAboveThreshold > (noise_threshold_seconds * 10)) {
                         countVolumeAboveThreshold = 0;
                         settings.strike = settings.strike + 1;
-                        displayStrike.innerHTML = settings.strike;                        
-                        audio_shh.play();
+                        displayStrike.innerHTML = settings.strike;
+                        //audio_shh.play();
                     }
 
-                    // TODO -> REFACTORY CON IL TIMER ... 
+                    // TODO -> REFACTORY CON IL TIMER ...
                     if (timeElapseMs > 9) {
                         timeElapseMs = timeElapseMs = 0;
                         timeElapseSecond = timeElapseSecond + 1;
@@ -352,7 +448,7 @@
                         }
                         let newLabel = timeElapseMinutes + ":" + timeElapseSecond;
                         addData(newLabel, averageVolume);
-                        countGraphData = countGraphData + 1;                        
+                        countGraphData = countGraphData + 1;
                     }
                     timeElapseMs = timeElapseMs + 1;
                 };
@@ -360,50 +456,6 @@
             } catch (e) {
                 alert('Failed to initialize volume visualizer ', e);
             }
-
-            // Use
-
-            startButton.addEventListener('click', () => {
-
-                // Add the minutes for the timer
-                var currentDateObj = new Date();
-                var numberOfMlSeconds = currentDateObj.getTime();
-                var addMlSeconds = settings.lesson_time * 60 * 1000;
-                countDownDate = new Date(numberOfMlSeconds + addMlSeconds);
-
-
-                // Updating every 100ms (should be same as CSS transition speed)
-                if (volumeCallback !== null && volumeInterval === null)
-                    volumeInterval = setInterval(volumeCallback, 100);
-
-                if (countdownTimer === null) {
-                    // Update the count down every 1 second
-                    countdownTimer = setInterval(UpdateClockCallBack, 1000);
-                } else {
-                    alert("Timer already set");
-                }
-
-                startButton.disabled = true;
-                stopButton.disabled = false;
-
-            });
-
-            stopButton.addEventListener('click', () => {
-
-                if (volumeInterval !== null) {
-                    clearInterval(volumeInterval);
-                    volumeInterval = null;
-                }
-
-                if (countdownTimer !== null) {
-                    clearInterval(countdownTimer);
-                    countdownTimer = null;
-                }
-
-                startButton.disabled = false;
-                stopButton.disabled = true;
-
-            });
 
         })();
 
@@ -458,15 +510,10 @@
             document.getElementById("display_timer").innerHTML = minutes + ":" + seconds;
         }
 
-
-
     </script>
 
 
     <!--CHART-->
-
-
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
@@ -491,18 +538,14 @@
             myChart.data.datasets[0].data.push(data);
             myChart.update();
         }
-        
+
         function removeData() {
             myChart.data.labels.shift();
             myChart.data.datasets[0].data.shift();
             myChart.update();
         }
 
-
     </script>
-
-
-
 
 </body>
 </html>
