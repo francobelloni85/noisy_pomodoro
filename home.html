@@ -1,11 +1,12 @@
-
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pomodoro with noise detector</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 
     <style>
         #volume-visualizer {
@@ -17,16 +18,16 @@
             background-color: #DDD;
         }
 
-            #volume-visualizer::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                left: 0;
-                width: var(--volume);
-                background-color: green;
-                transition: width 100ms linear;
-            }
+        #volume-visualizer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: var(--volume);
+            background-color: green;
+            transition: width 100ms linear;
+        }
 
         .main_label {
             font-family: 'Courier New';
@@ -43,6 +44,15 @@
     </style>
 </head>
 
+<!--
+
+TODO
+
+SALVARE DATI IN UN OGGETTO JSON ED ESPORTARLI
+https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
+
+-->
+
 <body>
 
     <div class="container-fluid">
@@ -52,15 +62,18 @@
                 <div class="accordion" id="accordionPanelsStayOpenExample">
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseOne">
                                 <strong>Pomodoro with noise detector</strong>
                             </button>
                         </h2>
-                        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
+                            aria-labelledby="panelsStayOpen-headingOne">
                             <div class="accordion-body">
                                 <div class="row mt-2">
                                     <div class="col-4 text-center">
-                                        <h3>Noise</h3>
+                                        <h3>Noise (㏈)</h3>
                                         <div id="volume-visualizer"></div>
                                     </div>
                                     <div class="col-1 text-center">
@@ -88,11 +101,14 @@
                     </div>
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                                aria-controls="panelsStayOpen-collapseTwo">
                                 Settings
                             </button>
                         </h2>
-                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
+                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+                            aria-labelledby="panelsStayOpen-headingTwo">
                             <div class="accordion-body">
 
 
@@ -102,7 +118,8 @@
                                             <label for="txtLessonTime" class="form-label">Lesson time (minutes)</label>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="txtLessonTime" name="txtLessonTime" placeholder="25">
+                                            <input type="text" class="form-control" id="txtLessonTime"
+                                                name="txtLessonTime" placeholder="25">
                                         </td>
                                     </tr>
 
@@ -111,52 +128,84 @@
                                             <label for="txtBreakTime" class="form-label">Break time (minutes)</label>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="txtBreakTime" name="txtBreakTime" placeholder="5">
+                                            <input type="text" class="form-control" id="txtBreakTime"
+                                                name="txtBreakTime" placeholder="5">
                                         </td>
                                     </tr>
 
                                     <tr>
                                         <td style="width:50%">
-                                            <label for="txtNoiseThresholdDecibelLesson" class="form-label">Noise threshold (decibel) for lesson</label>
+                                            <label for="txtNoiseThresholdDecibelLesson" class="form-label">Noise
+                                                threshold (decibel) for lesson</label>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="txtNoiseThresholdDecibelLesson" name="txtNoiseThresholdDecibelLesson" placeholder="50">
+                                            <input type="text" class="form-control" id="txtNoiseThresholdDecibelLesson"
+                                                name="txtNoiseThresholdDecibelLesson" placeholder="50">
                                         </td>
                                     </tr>
 
                                     <tr>
                                         <td style="width:50%">
-                                            <label for="txtNoiseThresholdTimeLesson" class="form-label">Noise threshold (seconds) for lesson</label>
+                                            <label for="txtNoiseThresholdTimeLesson" class="form-label">Noise threshold
+                                                (seconds) for lesson</label>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="txtNoiseThresholdTimeLesson" name="txtNoiseThresholdTimeLesson" placeholder="2">
+                                            <input type="text" class="form-control" id="txtNoiseThresholdTimeLesson"
+                                                name="txtNoiseThresholdTimeLesson" placeholder="2">
                                         </td>
                                     </tr>
 
                                     <tr>
                                         <td style="width:50%">
-                                            <label for="txtNoiseThresholdDecibelBreak" class="form-label">Noise threshold (decibel) for break</label>
+                                            <label for="txtNoiseThresholdDecibelBreak" class="form-label">Noise
+                                                threshold (decibel) for break</label>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="txtNoiseThresholdDecibelBreak" name="txtNoiseThresholdDecibelBreak" placeholder="70">
+                                            <input type="text" class="form-control" id="txtNoiseThresholdDecibelBreak"
+                                                name="txtNoiseThresholdDecibelBreak" placeholder="70">
                                         </td>
                                     </tr>
 
                                     <tr>
                                         <td style="width:50%">
-                                            <label for="txtNoiseThresholdTimeBreck" class="form-label">Noise threshold (seconds) for break</label>
+                                            <label for="txtNoiseThresholdTimeBreck" class="form-label">Noise threshold
+                                                (seconds) for break</label>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="txtNoiseThresholdTimeBreck" name="txtNoiseThresholdTimeBreck" placeholder="3">
+                                            <input type="text" class="form-control" id="txtNoiseThresholdTimeBreck"
+                                                name="txtNoiseThresholdTimeBreck" placeholder="3">
                                         </td>
                                     </tr>
 
                                     <tr>
                                         <td style="width:50%">
-                                            <label for="txtEnableAudio" class="form-label">Enable audio "Shhh" (ON = 1, OFF = 0)</label>
+                                            <label for="txtEnableAudio" class="form-label">Enable audio "Shhh" (ON = 1,
+                                                OFF = 0)</label>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="txtEnableAudio" name="txtEnableAudio" placeholder="1">
+                                            <input type="text" class="form-control" id="txtEnableAudio"
+                                                name="txtEnableAudio" placeholder="1">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtEnableChart" class="form-label">Enable Chart (ON = 1, OFF =
+                                                0)</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtEnableChart"
+                                                name="txtEnableChart" placeholder="1">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtChartMs" class="form-label">Sampling chart</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtChartMs" name="txtChartMs"
+                                                placeholder="50">
                                         </td>
                                     </tr>
 
@@ -169,11 +218,14 @@
                     </div>
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="panelsStayOpen-headingThree">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
+                                aria-controls="panelsStayOpen-collapseThree">
                                 Statistics
                             </button>
                         </h2>
-                        <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingThree">
+                        <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
+                            aria-labelledby="panelsStayOpen-headingThree">
                             <div class="accordion-body">
 
                                 <div>
@@ -185,10 +237,10 @@
                                 <table width="100%">
                                     <tr>
                                         <td style="width:50%">
-                                            <input type="text" class="form-control" id="txtClassName" name="txtClassName" placeholder="25">
+                                            <input type="text" class="form-control" id="txtClassName"
+                                                name="txtClassName" placeholder="25">
                                         </td>
                                         <td>
-                                            
                                         </td>
                                     </tr>
                                 </table>
@@ -203,8 +255,24 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+    <div class="container-fluid">
+        <div class="row mt-2">
+            <div class="col-12 text-secondary">
+                <p style="text-align:right;">
+                    Made with ♥ by <a class="text-secondary" target="_blank" href="https://www.francescobelloni.it">Francesco Belloni</a>
+                    &nbsp;&nbsp;&nbsp;
+                </p>
+            </div>
+        </div>
+    </div>
+   
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
+        integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD"
+        crossorigin="anonymous"></script>
 
     <!-- VARIABLES -->
     <script>
@@ -223,6 +291,8 @@
             noise_threshold_seconds_break: 3,
             enable_audio: 1,
             strike: 0,
+            enable_chart: 1,
+            chart_ms: 50,
         };
 
         // Next CountDown
@@ -254,7 +324,6 @@
         const displayStrike = document.getElementById('display_strike');
         const displayMode = document.getElementById('display_mode');
 
-
         startButton.disabled = false;
         stopButton.disabled = true;
         changeModeButton.disabled = true;
@@ -275,6 +344,8 @@
         document.getElementsByName("txtNoiseThresholdDecibelBreak")[0].addEventListener('change', ChangeSettings);
         document.getElementsByName("txtNoiseThresholdTimeBreck")[0].addEventListener('change', ChangeSettings);
         document.getElementsByName("txtEnableAudio")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtChartMs")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtEnableChart")[0].addEventListener('change', ChangeSettings);
 
         /* function */
 
@@ -318,8 +389,15 @@
                     settings.enable_audio = newValue;
                     break;
 
-            }
+                case "txtChartMs":
+                    settings.chart_ms = newValue;
+                    break;
 
+                case "txtEnableChart":
+                    settings.enable_chart = newValue;
+                    break;
+
+            }
             console.log("Setting have been changed");
             console.log(settings);
 
@@ -327,13 +405,11 @@
 
 
         function SetNewCountDownDate(minutesToAdd) {
-
             // Add the minutes for the timer
             var currentDateObj = new Date();
             var numberOfMlSeconds = currentDateObj.getTime();
             var addMlSeconds = minutesToAdd * 60 * 1000;
             countDownDate = new Date(numberOfMlSeconds + addMlSeconds);
-
         }
 
     </script>
@@ -379,6 +455,7 @@
                 startButton.disabled = false;
                 stopButton.disabled = true;
                 changeModeButton.disabled = true;
+                currentMode = modeLession;
 
             });
 
@@ -386,6 +463,7 @@
                 changeModeButton.innerText = currentMode;
 
                 ChangeMode();
+
                 displayMode.innerHTML = currentMode;
 
                 if (currentMode === modeLession) {
@@ -410,13 +488,12 @@
         }
 
         function SetNoiseNoiseThreshold(currentValue) {
-            if (currentMode === modeLession) {                
+            if (currentMode === modeLession) {
                 noise_threshold.innerHTML = currentValue + "/" + settings.noise_threshold_decibel_lesson;
             }
             else {
                 noise_threshold.innerHTML = currentValue + "/" + settings.noise_threshold_decibel_break;
             }
-
         }
 
 
@@ -450,17 +527,21 @@
                 const volumes = new Uint8Array(analyser.frequencyBinCount);
 
                 volumeCallback = () => {
+
                     analyser.getByteFrequencyData(volumes);
+                    let min = 5000;
+                    let max = 0;
                     let volumeSum = 0;
-                    for (const volume of volumes)
+
+                    for (const volume of volumes){
                         volumeSum += volume;
+                    }
                     const averageVolume = volumeSum / volumes.length;
 
                     SetNoiseNoiseThreshold(parseInt(averageVolume));
 
                     // Value range: 127 = analyser.maxDecibels - analyser.minDecibels;
                     volumeVisualizer.style.setProperty('--volume', (averageVolume * 100 / 127) + '%');
-
 
                     let noise_threshold = settings.noise_threshold_decibel_lesson;
                     let noise_threshold_seconds = settings.noise_threshold_seconds_lesson;
@@ -486,19 +567,31 @@
                         }
                     }
 
-                    // TODO -> REFACTORY CON IL TIMER ...
-                    if (timeElapseMs > 9) {
-                        timeElapseMs = timeElapseMs = 0;
-                        timeElapseSecond = timeElapseSecond + 1;
-                        if (timeElapseSecond > 59) {
-                            timeElapseSecond = 0;
-                            timeElapseMinutes = timeElapseMinutes + 1;
+
+                    if (settings.enable_chart === 1) {
+                        if (timeElapseMs > settings.chart_ms) {
+                            timeElapseMs = timeElapseMs = 0;
+                            // Find the distance between now and the count down date
+                            var distance = countDownDate - new Date().getTime();
+                            let newLabel = GetDisplayTimer(distance);
+                            addData(newLabel, averageVolume);
                         }
-                        let newLabel = timeElapseMinutes + ":" + timeElapseSecond;
-                        addData(newLabel, averageVolume);
-                        countGraphData = countGraphData + 1;
+                        timeElapseMs = timeElapseMs + 1;
                     }
-                    timeElapseMs = timeElapseMs + 1;
+
+                    // // TODO -> REFACTORY CON IL TIMER ...
+                    // if (timeElapseMs > 9) {
+                    //     timeElapseMs = timeElapseMs = 0;
+                    //     timeElapseSecond = timeElapseSecond + 1;
+                    //     if (timeElapseSecond > 59) {
+                    //         timeElapseSecond = 0;
+                    //         timeElapseMinutes = timeElapseMinutes + 1;
+                    //     }
+                    //     let newLabel = timeElapseMinutes + ":" + timeElapseSecond;
+                    //     addData(newLabel, averageVolume);
+                    //     countGraphData = countGraphData + 1;
+                    // }
+                    // timeElapseMs = timeElapseMs + 1;
                 };
 
             } catch (e) {
@@ -546,16 +639,16 @@
                 }
             }
 
-            SetDisplayTimer(distance);
+            // Display the result in the element with id="display_timer"
+            document.getElementById("display_timer").innerHTML = GetDisplayTimer(distance);
 
         }
 
-        function SetDisplayTimer(distance) {
+        function GetDisplayTimer(distance) {
             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
             if (seconds < 10) { seconds = "0" + seconds }
-            // Display the result in the element with id="display_timer"
-            document.getElementById("display_timer").innerHTML = minutes + ":" + seconds;
+            return minutes + ":" + seconds;
         }
 
     </script>
@@ -574,7 +667,7 @@
                 labels: [],
                 datasets: [{
                     label: 'Noise db',
-                    borderWidth: 2,
+                    borderWidth: 1,
                     fill: false,
                     data: []
                 }]
@@ -596,5 +689,34 @@
     </script>
 
 </body>
+
 </html>
 
+<!--
+
+                    let min = 5000;
+                    let max = 0;
+                    let volumeSum = 0;
+
+                    for (const volume of volumes){
+
+                        if (volume > 10){
+                            volumeSum += volume;
+                        }else{
+                            volumeSum += 10;
+                        }
+
+                        if(volume != 0 && volume < min ){ min = volume;}
+                        if(volume > max){ max = volume;}
+                        console.log(volume);
+                    }
+                    const averageVolume = volumeSum / volumes.length;
+
+                    console.log("-------" + new Date().getTime() + "-----------" );
+                    console.log("min:" + min);
+                    console.log("max:" + max);
+                    console.log("averageVolume:" + averageVolume);
+                    console.log("length:" + volumes.length);
+
+
+-->
