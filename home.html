@@ -209,6 +209,16 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                                         </td>
                                     </tr>
 
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtMicrophoneNoise" class="form-label">Microphone Noise</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtMicrophoneNoise"
+                                                name="txtMicrophoneNoise" placeholder="10">
+                                        </td>
+                                    </tr>
+
                                 </table>
 
 
@@ -259,13 +269,14 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
         <div class="row mt-2">
             <div class="col-12 text-secondary">
                 <p style="text-align:right;">
-                    Made with ♥ by <a class="text-secondary" target="_blank" href="https://www.francescobelloni.it">Francesco Belloni</a>
+                    Made with ♥ by <a class="text-secondary" target="_blank"
+                        href="https://www.francescobelloni.it">Francesco Belloni</a>
                     &nbsp;&nbsp;&nbsp;
                 </p>
             </div>
         </div>
     </div>
-   
+
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
         integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
@@ -290,6 +301,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
             noise_threshold_decibel_break: 70,
             noise_threshold_seconds_break: 3,
             enable_audio: 1,
+            microphone_noise: 10,
             strike: 0,
             enable_chart: 1,
             chart_ms: 50,
@@ -299,6 +311,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
         let countDownDate = new Date("Jan 5, 2024 15:37:25").getTime();
 
         var audio_shh = new Audio('https://www.baobab.school/public/audio/ShushSoundEffect.mp3');
+        var audio_pause = new Audio('https://www.baobab.school/public/audio/BusStopRequested.mp3');
 
         // Timer
         let countdownTimer = null;
@@ -315,6 +328,8 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
 
         let volumeCallback = null;
         let volumeInterval = null;
+
+        let isBreakAudioPlayed = false;
 
         const volumeVisualizer = document.getElementById('volume-visualizer');
         const startButton = document.getElementById('btnStart');
@@ -346,6 +361,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
         document.getElementsByName("txtEnableAudio")[0].addEventListener('change', ChangeSettings);
         document.getElementsByName("txtChartMs")[0].addEventListener('change', ChangeSettings);
         document.getElementsByName("txtEnableChart")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtMicrophoneNoise")[0].addEventListener('change', ChangeSettings);
 
         /* function */
 
@@ -397,7 +413,11 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                     settings.enable_chart = newValue;
                     break;
 
+                case "txtMicrophoneNoise":
+                    settings.microphone_noise = newValue;
+
             }
+
             console.log("Setting have been changed");
             console.log(settings);
 
@@ -533,10 +553,15 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                     let max = 0;
                     let volumeSum = 0;
 
-                    for (const volume of volumes){
+                    for (const volume of volumes) {
                         volumeSum += volume;
                     }
-                    const averageVolume = volumeSum / volumes.length;
+
+                    let averageVolume = volumeSum / volumes.length;
+
+                    if (averageVolume + 1 > settings.microphone_noise) {
+                        averageVolume = averageVolume - settings.microphone_noise;
+                    }
 
                     SetNoiseNoiseThreshold(parseInt(averageVolume));
 
@@ -561,7 +586,6 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                         countVolumeAboveThreshold = 0;
                         settings.strike = settings.strike + 1;
                         displayStrike.innerHTML = settings.strike;
-
                         if (settings.enable_audio === 1) {
                             audio_shh.play();
                         }
@@ -630,13 +654,18 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                     el.classList.remove("text-danger");
                 }
                 distance = now - countDownDate;
+
+                if (settings.enable_audio === 1 && isBreakAudioPlayed === false) {
+                    audio_pause.play();
+                    isBreakAudioPlayed = true;
+                }
             }
             else {
-
                 if (el.classList.contains("text-success") === false) {
                     el.classList.add("text-success");
                     el.classList.remove("text-danger");
                 }
+                isBreakAudioPlayed = false;
             }
 
             // Display the result in the element with id="display_timer"
