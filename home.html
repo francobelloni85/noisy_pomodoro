@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pomodoro with noise detector</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 
     <style>
         #volume-visualizer {
@@ -18,16 +18,16 @@
             background-color: #DDD;
         }
 
-        #volume-visualizer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            width: var(--volume);
-            background-color: green;
-            transition: width 100ms linear;
-        }
+            #volume-visualizer::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: var(--volume);
+                background-color: green;
+                transition: width 100ms linear;
+            }
 
         .main_label {
             font-family: 'Courier New';
@@ -231,6 +231,16 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                                         </td>
                                     </tr>
 
+                                    <tr>
+                                        <td style="width:50%">
+                                            <label for="txtEnableAnalyzer" class="form-label">Enable Analyzer Chart</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtEnableAnalyzer"
+                                                   name="txtEnableAnalyzer" placeholder="1">
+                                        </td>
+                                    </tr>
+
                                 </table>
 
 
@@ -238,6 +248,8 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                             </div>
                         </div>
                     </div>
+
+
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="panelsStayOpen-headingThree">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -255,35 +267,55 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                                 </div>
 
                                 <br /><br />
-
+                                <h5>Export data json</h5>
                                 <table width="100%">
                                     <tr>
                                         <td style="width:50%">
-                                            <input type="text" class="form-control" id="txtClassName"
-                                                   name="txtClassName" placeholder="25">
+                                            <input type="text" class="form-control" id="txtClassName"name="txtClassName" placeholder="file name">
                                         </td>
                                         <td>
+                                            <button id="btnExport" class="btn btn-success">Export</button>
                                         </td>
                                     </tr>
                                 </table>
 
-                                <button id="btnExport" class="btn btn-success">Export</button>
 
                             </div>
                         </div>
                     </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingWave">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseWave" aria-expanded="false"
+                                    aria-controls="panelsStayOpen-collapseWave">
+                                Wave
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseWave" class="accordion-collapse collapse"
+                             aria-labelledby="panelsStayOpen-headingWave">
+                            <div class="accordion-body">
+
+                                <div class="container-fluid">
+                                    <div class="row mt-2">
+                                        <div class="col-12 text-center">
+                                            <canvas id="myCanvas" width="400" height="200" style="border: 2px solid green; background-color: whitesmoke;"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="container-fluid">
-        <div class="row mt-2">
-            <div class="col-12 text-center">
-                <canvas id="myCanvas" width="256" height="200" style="border:1px solid #000000;"></canvas>
-            </div>
-        </div>
-    </div>
+
 
     <div class="container-fluid">
         <div class="row mt-2">
@@ -319,10 +351,11 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
             noise_threshold_decibel_break: 70,
             noise_threshold_seconds_break: 3,
             enable_audio: 1,
-            microphone_noise: 10,
+            microphone_noise: 0,
             strike: 0,
-            enable_chart: 1,
+            enable_chart: 0,
             chart_ms: 50,
+            is_analyzer_enable: 1,
         };
 
         // Next CountDown
@@ -380,6 +413,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
         document.getElementsByName("txtChartMs")[0].addEventListener('change', ChangeSettings);
         document.getElementsByName("txtEnableChart")[0].addEventListener('change', ChangeSettings);
         document.getElementsByName("txtMicrophoneNoise")[0].addEventListener('change', ChangeSettings);
+        document.getElementsByName("txtEnableAnalyzer")[0].addEventListener('change', ChangeSettings);
 
         /* function */
 
@@ -433,6 +467,9 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
 
                 case "txtMicrophoneNoise":
                     settings.microphone_noise = newValue;
+
+                case "txtEnableAnalyzer":
+                    settings.is_analyzer_enable = newValue;
 
             }
 
@@ -525,7 +562,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
             }
         }
 
-        function SetNoiseNoiseThreshold(currentValue) {
+        function SetNoiseThreshold(currentValue) {
             if (currentMode === modeLession) {
                 noise_threshold.innerHTML = currentValue + "/" + settings.noise_threshold_decibel_lesson;
             }
@@ -558,7 +595,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                 const audioContext = new AudioContext();
                 const audioSource = audioContext.createMediaStreamSource(audioStream);
                 const analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
+                analyser.fftSize = 1024;
                 //analyser.minDecibels = -127;
                 //analyser.maxDecibels = 0;
                 //analyser.smoothingTimeConstant = 0.4;
@@ -566,14 +603,12 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
 
                 const volumes = new Uint8Array(analyser.frequencyBinCount);
 
-                
+
 
                 volumeCallback = () => {
 
                     analyser.getByteFrequencyData(volumes);
                     let volumeSum = 0;
-
-                    //var t = volumes.sort();
 
                     var tempData = [];
                     let x = 0;
@@ -581,24 +616,23 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
 
                     for (const volume of volumes) {
                         volumeSum += volume;
-                        if(volume > max) { max = volume; }
+                        if (volume > max) { max = volume; }
                         let data = { "x": x, "y": volume };
                         tempData.push(data);
-                        x++;
+                        x = x + 2;
                     }
 
-                    //var maxGraphValue = max + 20;
+                    if (settings.is_analyzer_enable) {
+                        context.clearRect(0, 0, myCanvas.width, myCanvas.height);
+                        context.strokeStyle = 'black';
+                        context.beginPath();
+                        context.moveTo(0, 0);
+                        for (let point of tempData) {
 
-                    context.clearRect(0, 0, myCanvas.width, myCanvas.height);
-                    context.beginPath();
-                    context.moveTo(0, 0);
-                    for (let point of tempData) {
-
-                        context.lineTo(point.x, myCanvas.height - point.y);
+                            context.lineTo(point.x, myCanvas.height - point.y);
+                        }
+                        context.stroke();
                     }
-                    context.stroke();
-
-                   
 
                     let averageVolume = volumeSum / volumes.length;
 
@@ -606,12 +640,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                         averageVolume = averageVolume - settings.microphone_noise;
                     }
 
-                    //context.beginPath();
-                    //context.moveTo(0, maxGraphValue - averageVolume);
-                    //context.lineTo(myCanvas.width, maxGraphValue - averageVolume);
-                    //context.stroke();
-
-                    SetNoiseNoiseThreshold(parseInt(averageVolume));
+                    SetNoiseThreshold(parseInt(averageVolume));
 
                     // Value range: 127 = analyser.maxDecibels - analyser.minDecibels;
                     volumeVisualizer.style.setProperty('--volume', (averageVolume * 100 / 127) + '%');
@@ -631,7 +660,7 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                     }
 
                     if (countVolumeAboveThreshold > (noise_threshold_seconds * 10)) {
-                        countVolumeAboveThreshold = 0;
+                        countVolumeAboveThreshold = -5;
                         settings.strike = settings.strike + 1;
                         displayStrike.innerHTML = settings.strike;
                         if (settings.enable_audio === 1) {
@@ -639,6 +668,11 @@ https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
                         }
                     }
 
+                    context.beginPath();
+                    context.strokeStyle = 'red';
+                    context.moveTo(0, myCanvas.height - noise_threshold);
+                    context.lineTo(myCanvas.width, myCanvas.height - noise_threshold);
+                    context.stroke();
 
                     if (settings.enable_chart === 1) {
                         if (timeElapseMs > settings.chart_ms) {
